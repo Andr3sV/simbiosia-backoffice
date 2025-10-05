@@ -184,9 +184,9 @@ export async function POST(request: NextRequest) {
       .from('elevenlabs_conversations')
       .select('cost, call_charge, llm_charge');
 
-    const totalCost = costStats?.reduce((sum, conv) => sum + (conv.cost || 0), 0) || 0;
-    const totalCallCharge = costStats?.reduce((sum, conv) => sum + (conv.call_charge || 0), 0) || 0;
-    const totalLlmCharge = costStats?.reduce((sum, conv) => sum + (conv.llm_charge || 0), 0) || 0;
+    const totalCost = costStats?.reduce((sum, conv) => sum + ((conv as any).cost || 0), 0) || 0;
+    const totalCallCharge = costStats?.reduce((sum, conv) => sum + ((conv as any).call_charge || 0), 0) || 0;
+    const totalLlmCharge = costStats?.reduce((sum, conv) => sum + ((conv as any).llm_charge || 0), 0) || 0;
 
     const summary = {
       total_conversation_ids: conversationIds.length,
