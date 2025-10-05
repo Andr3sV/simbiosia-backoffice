@@ -183,7 +183,7 @@ export async function POST(request: NextRequest) {
 
           const { error: callsError } = await supabase
             .from('calls')
-            .upsert(uniqueCalls, { onConflict: 'id' });
+            .upsert(uniqueCalls as any, { onConflict: 'id' });
 
           if (callsError) {
             console.error(`  ❌ Error saving calls:`, callsError);
