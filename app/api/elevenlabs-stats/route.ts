@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
     let totalFreeLlmDollarsConsumed = 0;
     let totalDevDiscount = 0;
 
-    for (const workspace of workspaces || []) {
+    for (const workspace of (workspaces as Array<{ id: number }> | null) || []) {
       const { data: snapshot } = await supabase
         .from('elevenlabs_snapshots')
         .select(

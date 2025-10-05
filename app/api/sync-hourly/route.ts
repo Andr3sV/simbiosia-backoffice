@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     const snapshotDate = new Date(now.getTime() - (now.getTime() % (60 * 60 * 1000))); // Redondear a la hora
 
     // Procesar cada workspace
-    for (const workspace of workspaces || []) {
+    for (const workspace of (workspaces as Array<{ id: number }> | null) || []) {
       // Obtener números asociados al workspace
       const { data: phones } = await supabase
         .from('workspace_phones')
