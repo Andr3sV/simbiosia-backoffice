@@ -60,12 +60,16 @@ export async function GET() {
                     combined_total_calls: twilioTotalCalls + elevenlabsTotalCalls,
                     combined_total_cost: twilioTotalCost + elevenlabsTotalCost,
                     snapshot_date:
-                      (twilioSnapshot as any)?.snapshot_date || (elevenlabsSnapshot as any)?.snapshot_date,
+                      (twilioSnapshot as any)?.snapshot_date ||
+                      (elevenlabsSnapshot as any)?.snapshot_date,
                   }
                 : null,
           };
         } catch (err) {
-          console.error(`Exception fetching snapshots for workspace ${(workspace as any).id}:`, err);
+          console.error(
+            `Exception fetching snapshots for workspace ${(workspace as any).id}:`,
+            err
+          );
           return {
             ...(workspace as any),
             latest_snapshot: null,

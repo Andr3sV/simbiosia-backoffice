@@ -27,11 +27,11 @@ export async function POST(request: NextRequest) {
 
     const supabase = getServerSupabase();
 
-    console.log('🔄 Iniciando sincronización horaria de Twilio...');
+    console.log('🔄 Iniciando sincronización diaria de Twilio...');
 
-    // Sincronizar última hora + 15 minutos de margen
+    // Sincronizar últimas 24 horas exactas (sin margen para evitar duplicados)
     const now = new Date();
-    const startDate = new Date(now.getTime() - 75 * 60 * 1000); // 1h 15min atrás
+    const startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000); // 24 horas atrás
 
     let totalCalls = 0;
     let savedCalls = 0;
@@ -59,12 +59,12 @@ export async function POST(request: NextRequest) {
     // Almacenar todas las llamadas
     const allCalls: TwilioCall[] = [];
 
-    // Obtener llamadas de Twilio (solo última hora, mucho más rápido)
-    console.log('📞 Obteniendo llamadas de la última hora...');
+    // Obtener llamadas de Twilio (últimas 24 horas)
+    console.log('📞 Obteniendo llamadas de las últimas 24 horas...');
 
     const callsPage: any = await twilioClient.calls.list({
       startTimeAfter: startDate,
-      pageSize: 1000, // Suficiente para 1 hora
+      pageSize: 1000, // Paginación automática manejada por Twilio SDK
     });
 
     if (callsPage && callsPage.length > 0) {
@@ -86,11 +86,12 @@ export async function POST(request: NextRequest) {
         });
       });
     } else {
-      console.log('  ℹ️ No hay llamadas nuevas en la última hora');
+      console.log('  ℹ️ No hay llamadas nuevas en las últimas 24 horas');
       return NextResponse.json({
         success: true,
         totalCalls: 0,
         savedCalls: 0,
+        snapshotsCreated: 0,
         message: 'No hay llamadas nuevas',
       });
     }
@@ -270,12 +271,79 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    console.log('\n🎉 Sincronización horaria completada!');
+    // Generar snapshots por workspace y hora
+    console.log('\n📊 Generando snapshots por hora...');
+
+    const snapshotMap = new Map<
+      string,
+      {
+        workspace_id: number;
+        snapshot_date: string;
+        total_calls: number;
+        total_cost: number;
+        total_duration: number;
+      }
+    >();
+
+    for (const call of callsToInsert) {
+      // Truncar call_date a la hora (eliminar minutos, segundos)
+      const callDate = new Date(call.call_date);
+      callDate.setMinutes(0, 0, 0); // Poner minutos, segundos y ms a 0
+      const hourKey = callDate.toISOString();
+
+      // Crear clave única: workspace_id + hora
+      const key = `${call.workspace_id}_${hourKey}`;
+
+      if (!snapshotMap.has(key)) {
+        snapshotMap.set(key, {
+          workspace_id: call.workspace_id,
+          snapshot_date: hourKey,
+          total_calls: 0,
+          total_cost: 0,
+          total_duration: 0,
+        });
+      }
+
+      const snapshot = snapshotMap.get(key)!;
+      snapshot.total_calls++;
+      snapshot.total_cost += call.cost || 0;
+      snapshot.total_duration += call.duration || 0;
+    }
+
+    // Convertir Map a array
+    const snapshots = Array.from(snapshotMap.values()).map((snapshot) => ({
+      workspace_id: snapshot.workspace_id,
+      snapshot_date: snapshot.snapshot_date,
+      total_calls: snapshot.total_calls,
+      total_cost: parseFloat(snapshot.total_cost.toFixed(4)),
+      total_duration: snapshot.total_duration,
+    }));
+
+    let snapshotsCreated = 0;
+    if (snapshots.length > 0) {
+      console.log(`  📊 Insertando ${snapshots.length} snapshots...`);
+
+      const { error: snapshotError } = await supabase
+        .from('twilio_snapshots')
+        .upsert(snapshots as any, {
+          onConflict: 'workspace_id,snapshot_date',
+        });
+
+      if (snapshotError) {
+        console.error('  ❌ Error insertando snapshots:', snapshotError);
+      } else {
+        snapshotsCreated = snapshots.length;
+        console.log(`  ✅ Guardados ${snapshotsCreated} snapshots`);
+      }
+    }
+
+    console.log('\n🎉 Sincronización diaria completada!');
     console.log(`📊 Total llamadas obtenidas: ${totalCalls}`);
     console.log(`  📤 Caso 1 (outbound-api): ${case1Count}`);
     console.log(`  📤 Caso 2 (trunking-terminating): ${case2Count}`);
     console.log(`  📥 Caso 3 (trunking-originating): ${case3Count}`);
     console.log(`💾 Total llamadas guardadas: ${savedCalls}`);
+    console.log(`📊 Total snapshots creados/actualizados: ${snapshotsCreated}`);
     console.log(`📱 Números de workspace creados: ${createdPhones}`);
 
     return NextResponse.json({
@@ -284,17 +352,19 @@ export async function POST(request: NextRequest) {
       period: {
         start: startDate.toISOString(),
         end: now.toISOString(),
+        hours: 24,
       },
       totalCalls,
       savedCalls,
+      snapshotsCreated,
       createdPhones,
       case1Count,
       case2Count,
       case3Count,
-      message: 'Sincronización horaria completada',
+      message: 'Sincronización diaria completada con snapshots (24 horas)',
     });
   } catch (error) {
-    console.error('Error en sincronización horaria:', error);
+    console.error('Error en sincronización diaria:', error);
     return NextResponse.json(
       {
         success: false,

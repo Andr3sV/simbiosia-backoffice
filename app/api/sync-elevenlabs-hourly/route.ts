@@ -12,15 +12,17 @@ export async function POST(request: NextRequest) {
 
     const supabase = getServerSupabase();
 
-    // Obtener datos de la última hora + 15 minutos de margen
+    console.log('🔄 Iniciando sincronización diaria de ElevenLabs...');
+
+    // Sincronizar últimas 24 horas exactas (sin margen para evitar duplicados)
     const now = new Date();
-    const startDate = new Date(now.getTime() - 75 * 60 * 1000); // 1 hora 15 min atrás
+    const startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000); // 24 horas atrás
     const startTimestamp = Math.floor(startDate.getTime() / 1000);
 
-    console.log(`📅 Syncing ElevenLabs data from ${startDate.toISOString()}`);
+    console.log(`📅 Periodo: ${startDate.toISOString()} - ${now.toISOString()}`);
 
-    // Obtener conversaciones de la última hora
-    console.log('📞 Fetching ElevenLabs conversations...');
+    // Obtener conversaciones de las últimas 24 horas
+    console.log('💬 Obteniendo conversaciones de ElevenLabs (últimas 24 horas)...');
 
     const conversations = [];
     let cursor: string | null = null;
@@ -178,40 +180,108 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Guardar snapshots por workspace
-    const snapshotDate = new Date(now.getTime() - (now.getTime() % (60 * 60 * 1000)));
-    let snapshotsSaved = 0;
+    // Generar snapshots por workspace y hora
+    console.log('\n📊 Generando snapshots por hora...');
 
+    const snapshotMap = new Map<
+      string,
+      {
+        workspace_id: number;
+        snapshot_date: string;
+        total_conversations: number;
+        total_cost: number;
+        total_duration: number;
+        llm_price: number;
+        llm_charge: number;
+        call_charge: number;
+        free_minutes_consumed: number;
+        free_llm_dollars_consumed: number;
+        dev_discount: number;
+      }
+    >();
+
+    // Agrupar las conversaciones guardadas por workspace y hora
     for (const [workspaceId, stats] of Array.from(workspaceStats.entries())) {
-      await supabase.from('elevenlabs_snapshots').upsert(
-        {
-          workspace_id: workspaceId,
-          snapshot_date: snapshotDate.toISOString(),
-          total_conversations: stats.totalConversations,
-          total_cost: parseFloat(stats.totalCost.toFixed(4)),
-          total_duration: stats.totalDuration,
-          llm_usage: null, // Agregado si necesitas
-          llm_price: parseFloat(stats.llmPrice.toFixed(4)),
-          llm_charge: parseFloat(stats.llmCharge.toFixed(4)),
-          call_charge: parseFloat(stats.callCharge.toFixed(4)),
-          free_minutes_consumed: parseFloat(stats.freeMinutesConsumed.toFixed(4)),
-          free_llm_dollars_consumed: parseFloat(stats.freeLlmDollarsConsumed.toFixed(4)),
-          dev_discount: parseFloat(stats.devDiscount.toFixed(4)),
-        } as any,
-        { onConflict: 'workspace_id,snapshot_date' }
-      );
+      for (const conv of stats.conversations) {
+        // Truncar conversation_date a la hora (eliminar minutos, segundos)
+        const convDate = new Date(
+          conv.metadata?.start_time_unix_secs
+            ? conv.metadata.start_time_unix_secs * 1000
+            : Date.now()
+        );
+        convDate.setMinutes(0, 0, 0); // Poner minutos, segundos y ms a 0
+        const hourKey = convDate.toISOString();
 
-      snapshotsSaved++;
-      console.log(
-        `  ✅ Workspace ${workspaceId}: ${
-          stats.totalConversations
-        } conversations, $${stats.totalCost.toFixed(4)}`
-      );
+        // Crear clave única: workspace_id + hora
+        const key = `${workspaceId}_${hourKey}`;
+
+        if (!snapshotMap.has(key)) {
+          snapshotMap.set(key, {
+            workspace_id: workspaceId,
+            snapshot_date: hourKey,
+            total_conversations: 0,
+            total_cost: 0,
+            total_duration: 0,
+            llm_price: 0,
+            llm_charge: 0,
+            call_charge: 0,
+            free_minutes_consumed: 0,
+            free_llm_dollars_consumed: 0,
+            dev_discount: 0,
+          });
+        }
+
+        const snapshot = snapshotMap.get(key)!;
+        snapshot.total_conversations++;
+        snapshot.total_cost += conv.metadata?.cost || 0;
+        snapshot.total_duration += conv.metadata?.call_duration_secs || 0;
+        snapshot.llm_price += conv.metadata?.charging?.llm_price || 0;
+        snapshot.llm_charge += conv.metadata?.charging?.llm_charge || 0;
+        snapshot.call_charge += conv.metadata?.charging?.call_charge || 0;
+        snapshot.free_minutes_consumed += conv.metadata?.charging?.free_minutes_consumed || 0;
+        snapshot.free_llm_dollars_consumed +=
+          conv.metadata?.charging?.free_llm_dollars_consumed || 0;
+        snapshot.dev_discount += conv.metadata?.charging?.dev_discount || 0;
+      }
     }
 
-    console.log(
-      `\n✅ ElevenLabs sync completed: ${conversationDetails.length} conversations, ${snapshotsSaved} snapshots`
-    );
+    // Convertir Map a array y formatear
+    const snapshots = Array.from(snapshotMap.values()).map((snapshot) => ({
+      workspace_id: snapshot.workspace_id,
+      snapshot_date: snapshot.snapshot_date,
+      total_conversations: snapshot.total_conversations,
+      total_cost: parseFloat(snapshot.total_cost.toFixed(4)),
+      total_duration: snapshot.total_duration,
+      llm_usage: null,
+      llm_price: parseFloat(snapshot.llm_price.toFixed(4)),
+      llm_charge: parseFloat(snapshot.llm_charge.toFixed(4)),
+      call_charge: parseFloat(snapshot.call_charge.toFixed(4)),
+      free_minutes_consumed: parseFloat(snapshot.free_minutes_consumed.toFixed(4)),
+      free_llm_dollars_consumed: parseFloat(snapshot.free_llm_dollars_consumed.toFixed(4)),
+      dev_discount: parseFloat(snapshot.dev_discount.toFixed(4)),
+    }));
+
+    let snapshotsSaved = 0;
+    if (snapshots.length > 0) {
+      console.log(`  📊 Insertando ${snapshots.length} snapshots...`);
+
+      const { error: snapshotError } = await supabase
+        .from('elevenlabs_snapshots')
+        .upsert(snapshots as any, {
+          onConflict: 'workspace_id,snapshot_date',
+        });
+
+      if (snapshotError) {
+        console.error('  ❌ Error insertando snapshots:', snapshotError);
+      } else {
+        snapshotsSaved = snapshots.length;
+        console.log(`  ✅ Guardados ${snapshotsSaved} snapshots`);
+      }
+    }
+
+    console.log('\n🎉 Sincronización diaria de ElevenLabs completada!');
+    console.log(`💬 Total conversaciones procesadas: ${conversationDetails.length}`);
+    console.log(`📊 Total snapshots creados/actualizados: ${snapshotsSaved}`);
 
     return NextResponse.json({
       success: true,
@@ -219,14 +289,16 @@ export async function POST(request: NextRequest) {
       period: {
         start: startDate.toISOString(),
         end: now.toISOString(),
+        hours: 24,
       },
       summary: {
         conversations_processed: conversationDetails.length,
-        snapshots_saved: snapshotsSaved,
+        snapshots_created: snapshotsSaved,
       },
+      message: 'Sincronización diaria completada con snapshots (24 horas)',
     });
   } catch (error) {
-    console.error('ElevenLabs sync error:', error);
+    console.error('Error en sincronización diaria de ElevenLabs:', error);
     return NextResponse.json(
       {
         success: false,
