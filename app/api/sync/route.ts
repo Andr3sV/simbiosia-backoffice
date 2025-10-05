@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
             .insert({
               name: `Workspace ${workspaceNumber}`,
               phone_number: workspaceNumber, // Por compatibilidad
-            })
+            } as any)
             .select()
             .single();
 
