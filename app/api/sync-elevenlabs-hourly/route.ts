@@ -182,7 +182,7 @@ export async function POST(request: NextRequest) {
     const snapshotDate = new Date(now.getTime() - (now.getTime() % (60 * 60 * 1000)));
     let snapshotsSaved = 0;
 
-    for (const [workspaceId, stats] of workspaceStats) {
+    for (const [workspaceId, stats] of Array.from(workspaceStats.entries())) {
       await supabase.from('elevenlabs_snapshots').upsert(
         {
           workspace_id: workspaceId,
