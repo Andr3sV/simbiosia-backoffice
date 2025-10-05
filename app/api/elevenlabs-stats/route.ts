@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
     const conversationsWithWorkspace =
       (allConversations as any)?.filter((c: any) => c.workspace_id !== null).length || 0;
     const conversationsWithoutWorkspace =
-      allConversations?.filter((c) => c.workspace_id === null).length || 0;
+      (allConversations as any)?.filter((c: any) => c.workspace_id === null).length || 0;
 
     return NextResponse.json({
       success: true,
