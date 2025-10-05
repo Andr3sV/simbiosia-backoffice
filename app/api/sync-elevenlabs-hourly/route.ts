@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
 
       if (!phoneData) continue;
 
-      const workspaceId = phoneData.workspace_id;
+      const workspaceId = (phoneData as any).workspace_id;
 
       if (!workspaceStats.has(workspaceId)) {
         workspaceStats.set(workspaceId, {
