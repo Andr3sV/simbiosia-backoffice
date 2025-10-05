@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     const snapshotDate = new Date(); // Fecha actual para el snapshot histórico
 
     // Para cada workspace, calcular totales desde la tabla calls
-    for (const workspace of workspaces || []) {
+    for (const workspace of (workspaces as Array<{ id: number }> | null) || []) {
       console.log(`\n📊 Processing workspace ${workspace.id}...`);
 
       // Obtener todas las llamadas de Twilio para este workspace
