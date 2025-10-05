@@ -37,10 +37,10 @@ export async function GET(request: NextRequest) {
         .maybeSingle();
 
       if (snapshot) {
-        totalConversations += snapshot.total_conversations || 0;
-        totalCost += parseFloat(snapshot.total_cost || '0');
-        totalDuration += parseInt(snapshot.total_duration || '0');
-        totalLlmPrice += parseFloat(snapshot.llm_price || '0');
+        totalConversations += (snapshot as any).total_conversations || 0;
+        totalCost += parseFloat((snapshot as any).total_cost || '0');
+        totalDuration += parseInt((snapshot as any).total_duration || '0');
+        totalLlmPrice += parseFloat((snapshot as any).llm_price || '0');
         totalLlmCharge += parseFloat(snapshot.llm_charge || '0');
         totalCallCharge += parseFloat(snapshot.call_charge || '0');
         totalFreeMinutesConsumed += parseFloat(snapshot.free_minutes_consumed || '0');
