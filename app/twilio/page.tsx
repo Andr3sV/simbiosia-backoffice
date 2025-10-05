@@ -2,9 +2,36 @@
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Phone, DollarSign, Clock, Zap, TrendingUp, Timer, Calendar, Filter, BarChart3, Building2 } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Phone,
+  DollarSign,
+  Clock,
+  Zap,
+  TrendingUp,
+  Timer,
+  Calendar,
+  Filter,
+  BarChart3,
+  Building2,
+} from 'lucide-react';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+} from 'recharts';
 
 interface ChartDataPoint {
   date: string;
@@ -37,7 +64,9 @@ export default function TwilioPage() {
   const [activeFilter, setActiveFilter] = useState<string>('all');
   const [selectedWorkspace, setSelectedWorkspace] = useState<string>('all');
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
-  const [chartType, setChartType] = useState<'calls' | 'cost' | 'duration' | 'real_minutes'>('calls');
+  const [chartType, setChartType] = useState<'calls' | 'cost' | 'duration' | 'real_minutes'>(
+    'calls'
+  );
 
   const fetchWorkspaces = async () => {
     try {
@@ -56,20 +85,20 @@ export default function TwilioPage() {
       setLoading(true);
       let url = '/api/twilio-stats';
       const params = new URLSearchParams();
-      
+
       if (startDate && endDate) {
         params.append('startDate', startDate);
         params.append('endDate', endDate);
       }
-      
+
       if (selectedWorkspace && selectedWorkspace !== 'all') {
         params.append('workspaceId', selectedWorkspace);
       }
-      
+
       if (params.toString()) {
         url += `?${params.toString()}`;
       }
-      
+
       const response = await fetch(url);
       const data = await response.json();
       if (data.success) {
@@ -144,7 +173,7 @@ export default function TwilioPage() {
   const statCards = [
     {
       title: 'Total Calls',
-      value: stats?.total_calls?.toLocaleString() || '0',
+      value: stats?.total_calls?.toLocaleString('en-US') || '0',
       description: 'All Twilio calls (from snapshots)',
       icon: Phone,
       color: 'text-blue-600',
@@ -152,7 +181,7 @@ export default function TwilioPage() {
     },
     {
       title: 'Total Cost',
-      value: `$${stats?.total_price?.toFixed(2) || '0.00'}`,
+      value: `$${stats?.total_price?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}`,
       description: 'Total spent on calls (from snapshots)',
       icon: DollarSign,
       color: 'text-green-600',
@@ -160,7 +189,7 @@ export default function TwilioPage() {
     },
     {
       title: 'Total Minutes',
-      value: stats?.total_real_minutes?.toLocaleString() || '0',
+      value: stats?.total_real_minutes?.toLocaleString('en-US') || '0',
       description: 'Billable minutes (rounded up)',
       icon: Clock,
       color: 'text-purple-600',
@@ -168,7 +197,7 @@ export default function TwilioPage() {
     },
     {
       title: 'Total Seconds',
-      value: stats?.total_duration_secs?.toLocaleString() || '0',
+      value: stats?.total_duration_secs?.toLocaleString('en-US') || '0',
       description: 'Total seconds (from snapshots)',
       icon: TrendingUp,
       color: 'text-orange-600',
@@ -176,7 +205,7 @@ export default function TwilioPage() {
     },
     {
       title: 'Avg Seconds/Call',
-      value: stats?.avg_seconds_per_call?.toLocaleString() || '0',
+      value: stats?.avg_seconds_per_call?.toLocaleString('en-US') || '0',
       description: 'Average duration per call',
       icon: Timer,
       color: 'text-cyan-600',
@@ -187,12 +216,6 @@ export default function TwilioPage() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#171717' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white">Twilio Analytics</h1>
-          <p className="mt-2 text-gray-400">Monitor your Twilio voice calls and costs</p>
-        </div>
-
         {/* Date Filter */}
         <Card className="mb-8 border border-transparent" style={{ backgroundColor: '#282929' }}>
           <CardContent>
@@ -295,12 +318,15 @@ export default function TwilioPage() {
                     <SelectValue placeholder="Select workspace" />
                   </SelectTrigger>
                   <SelectContent className="bg-gray-800 border-gray-600">
-                    <SelectItem value="all" className="text-white focus:bg-gray-700 focus:text-white">
+                    <SelectItem
+                      value="all"
+                      className="text-white focus:bg-gray-700 focus:text-white"
+                    >
                       All Workspaces
                     </SelectItem>
                     {workspaces.map((workspace) => (
-                      <SelectItem 
-                        key={workspace.id} 
+                      <SelectItem
+                        key={workspace.id}
                         value={workspace.id.toString()}
                         className="text-white focus:bg-gray-700 focus:text-white"
                       >
@@ -389,9 +415,14 @@ export default function TwilioPage() {
                 </div>
               </div>
               <CardDescription className="text-gray-400">
-                Daily evolution of {chartType === 'calls' ? 'call volume' : 
-                chartType === 'cost' ? 'costs' : 
-                chartType === 'duration' ? 'call duration' : 'billable minutes'}
+                Daily evolution of{' '}
+                {chartType === 'calls'
+                  ? 'call volume'
+                  : chartType === 'cost'
+                  ? 'costs'
+                  : chartType === 'duration'
+                  ? 'call duration'
+                  : 'billable minutes'}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -399,13 +430,13 @@ export default function TwilioPage() {
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={stats.chart_data}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                    <XAxis 
-                      dataKey="date" 
+                    <XAxis
+                      dataKey="date"
                       stroke="#9CA3AF"
                       fontSize={12}
                       tickFormatter={(value) => new Date(value).toLocaleDateString()}
                     />
-                    <YAxis 
+                    <YAxis
                       stroke="#9CA3AF"
                       fontSize={12}
                       tickFormatter={(value) => {
@@ -419,14 +450,15 @@ export default function TwilioPage() {
                         backgroundColor: '#1F2937',
                         border: '1px solid #374151',
                         borderRadius: '8px',
-                        color: '#F9FAFB'
+                        color: '#F9FAFB',
                       }}
                       labelFormatter={(value) => new Date(value).toLocaleDateString()}
                       formatter={(value: any, name: string) => {
-                        if (chartType === 'cost') return [`$${value.toFixed(4)}`, 'Cost'];
-                        if (chartType === 'duration') return [`${Math.round(value / 60)}m ${value % 60}s`, 'Duration'];
-                        if (chartType === 'real_minutes') return [`${value} min`, 'Real Minutes'];
-                        return [value.toLocaleString(), 'Calls'];
+                        if (chartType === 'cost') return [`$${value.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}`, 'Cost'];
+                        if (chartType === 'duration')
+                          return [`${Math.round(value / 60)}m ${value % 60}s`, 'Duration'];
+                        if (chartType === 'real_minutes') return [`${value.toLocaleString('en-US')} min`, 'Real Minutes'];
+                        return [value.toLocaleString('en-US'), 'Calls'];
                       }}
                     />
                     <Line
@@ -478,10 +510,9 @@ export default function TwilioPage() {
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-400">Workspace</span>
                 <span className="text-sm font-semibold text-white">
-                  {selectedWorkspace === 'all' 
-                    ? 'All Workspaces' 
-                    : `Workspace ${selectedWorkspace}`
-                  }
+                  {selectedWorkspace === 'all'
+                    ? 'All Workspaces'
+                    : `Workspace ${selectedWorkspace}`}
                 </span>
               </div>
               <div className="flex justify-between items-center">
