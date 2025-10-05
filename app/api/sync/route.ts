@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
             elevenlabs_raw_data: elevenlabsData.calls as any,
             combined_total_calls: combinedTotalCalls,
             combined_total_cost: combinedTotalCost,
-          })
+          } as any)
           .select()
           .single();
 
