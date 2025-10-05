@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
 
       // Agregar datos de todos los números del workspace
       for (const phone of phones) {
-        const twilioData = twilioCallsByPhone.get(phone.phone_number);
+        const twilioData = twilioCallsByPhone.get((phone as any).phone_number);
         if (twilioData) {
           totalCalls += twilioData.calls.length;
           twilioData.calls.forEach((call) => {
