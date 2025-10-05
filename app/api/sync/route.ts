@@ -54,9 +54,9 @@ export async function POST(request: NextRequest) {
         let workspace: any;
         let isNewWorkspace = false;
 
-        if (existingPhone && existingPhone.workspaces) {
+        if (existingPhone && (existingPhone as any).workspaces) {
           // El número ya existe y está asociado a un workspace
-          workspace = existingPhone.workspaces;
+          workspace = (existingPhone as any).workspaces;
           console.log(`  ✓ Found existing workspace: ${workspace.name} (ID: ${workspace.id})`);
         } else {
           // Crear un nuevo workspace para este número
