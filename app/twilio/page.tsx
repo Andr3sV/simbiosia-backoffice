@@ -181,7 +181,12 @@ export default function TwilioPage() {
     },
     {
       title: 'Total Cost',
-      value: `$${stats?.total_price?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}`,
+      value: `$${
+        stats?.total_price?.toLocaleString('en-US', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }) || '0.00'
+      }`,
       description: 'Total spent on calls (from snapshots)',
       icon: DollarSign,
       color: 'text-green-600',
@@ -454,10 +459,18 @@ export default function TwilioPage() {
                       }}
                       labelFormatter={(value) => new Date(value).toLocaleDateString()}
                       formatter={(value: any, name: string) => {
-                        if (chartType === 'cost') return [`$${value.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}`, 'Cost'];
+                        if (chartType === 'cost')
+                          return [
+                            `$${value.toLocaleString('en-US', {
+                              minimumFractionDigits: 4,
+                              maximumFractionDigits: 4,
+                            })}`,
+                            'Cost',
+                          ];
                         if (chartType === 'duration')
                           return [`${Math.round(value / 60)}m ${value % 60}s`, 'Duration'];
-                        if (chartType === 'real_minutes') return [`${value.toLocaleString('en-US')} min`, 'Real Minutes'];
+                        if (chartType === 'real_minutes')
+                          return [`${value.toLocaleString('en-US')} min`, 'Real Minutes'];
                         return [value.toLocaleString('en-US'), 'Calls'];
                       }}
                     />

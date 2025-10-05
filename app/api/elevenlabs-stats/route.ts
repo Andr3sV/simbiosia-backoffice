@@ -4,7 +4,7 @@ import { getServerSupabase } from '@/lib/supabase';
 export async function GET(request: NextRequest) {
   try {
     const supabase = getServerSupabase();
-    
+
     // Obtener parámetros de fecha y workspace de la URL
     const { searchParams } = new URL(request.url);
     const startDate = searchParams.get('startDate');
@@ -24,13 +24,13 @@ export async function GET(request: NextRequest) {
     // Construir query con filtros de fecha y workspace opcionales
     let query = supabase
       .from('elevenlabs_snapshots')
-      .select('workspace_id, total_conversations, total_cost, total_duration, llm_charge, call_charge, snapshot_date')
+      .select(
+        'workspace_id, total_conversations, total_cost, total_duration, llm_charge, call_charge, snapshot_date'
+      )
       .order('snapshot_date', { ascending: false });
 
     if (startDate && endDate) {
-      query = query
-        .gte('snapshot_date', startDate)
-        .lte('snapshot_date', endDate);
+      query = query.gte('snapshot_date', startDate).lte('snapshot_date', endDate);
     }
 
     // Aplicar filtro de workspace si se proporciona
@@ -84,27 +84,33 @@ export async function GET(request: NextRequest) {
       totalDuration += parseInt((snapshot as any).total_duration || '0');
     }
 
-    console.log(`📈 Total: ${totalConversations} conversations, ${totalCost} credits, ${totalDuration}s`);
+    console.log(
+      `📈 Total: ${totalConversations} conversations, ${totalCost} credits, ${totalDuration}s`
+    );
 
     // Calcular promedio de duración por conversación
-    const avgCallDuration = totalConversations > 0 ? Math.round(totalDuration / totalConversations) : 0;
+    const avgCallDuration =
+      totalConversations > 0 ? Math.round(totalDuration / totalConversations) : 0;
 
     // Calcular costo aproximado (Total cost * 0.00007525404654)
     const costApprox = totalCost * 0.00007525404654;
 
     // Agrupar snapshots por fecha para el gráfico
-    const chartData = new Map<string, {
-      date: string;
-      conversations: number;
-      cost: number;
-      call_charges: number;
-      llm_charges: number;
-      duration: number;
-    }>();
+    const chartData = new Map<
+      string,
+      {
+        date: string;
+        conversations: number;
+        cost: number;
+        call_charges: number;
+        llm_charges: number;
+        duration: number;
+      }
+    >();
 
     for (const snapshot of snapshots) {
       const date = (snapshot as any).snapshot_date.split('T')[0]; // Solo la fecha (YYYY-MM-DD)
-      
+
       if (!chartData.has(date)) {
         chartData.set(date, {
           date,
@@ -127,7 +133,7 @@ export async function GET(request: NextRequest) {
     // Convertir a array y ordenar por fecha
     const chartDataArray = Array.from(chartData.values())
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-      .map(item => ({
+      .map((item) => ({
         ...item,
         cost: parseFloat(item.cost.toFixed(4)),
         call_charges: parseFloat(item.call_charges.toFixed(4)),
