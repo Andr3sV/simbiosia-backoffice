@@ -28,7 +28,7 @@ export async function GET() {
           const { data: twilioSnapshot } = await supabase
             .from('twilio_snapshots')
             .select('total_calls, total_cost, total_duration, snapshot_date')
-            .eq('workspace_id', workspace.id)
+            .eq('workspace_id', (workspace as any).id)
             .order('snapshot_date', { ascending: false })
             .limit(1)
             .maybeSingle();
@@ -37,7 +37,7 @@ export async function GET() {
           const { data: elevenlabsSnapshot } = await supabase
             .from('elevenlabs_snapshots')
             .select('total_conversations, total_cost, total_duration, snapshot_date')
-            .eq('workspace_id', workspace.id)
+            .eq('workspace_id', (workspace as any).id)
             .order('snapshot_date', { ascending: false })
             .limit(1)
             .maybeSingle();
