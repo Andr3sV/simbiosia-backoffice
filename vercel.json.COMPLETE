@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/sync-hourly",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/sync-elevenlabs-hourly",
+      "schedule": "5 * * * *"
+    }
+  ]
+}
