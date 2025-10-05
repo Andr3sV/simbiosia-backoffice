@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     const results = [];
 
     // Para cada workspace number detectado
-    for (const workspaceNumber of allWorkspaceNumbers) {
+    for (const workspaceNumber of Array.from(allWorkspaceNumbers)) {
       try {
         console.log(`\n📞 Processing workspace number: ${workspaceNumber}`);
 
