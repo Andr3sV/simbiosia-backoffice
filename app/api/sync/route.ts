@@ -242,7 +242,7 @@ export async function POST(request: NextRequest) {
             .single();
 
           if (phoneData) {
-            workspaceId = phoneData.workspace_id;
+            workspaceId = (phoneData as any).workspace_id;
             conversationsWithWorkspace++;
           }
         }
