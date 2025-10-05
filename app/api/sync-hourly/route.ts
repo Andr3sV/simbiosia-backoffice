@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
             total_calls: totalCalls,
             total_cost: parseFloat(totalCost.toFixed(4)),
             total_duration: totalDuration,
-          },
+          } as any,
           { onConflict: 'workspace_id,snapshot_date' }
         );
 
