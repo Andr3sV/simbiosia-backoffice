@@ -37,15 +37,16 @@ export async function GET(request: NextRequest) {
         .maybeSingle();
 
       if (snapshot) {
-        totalConversations += (snapshot as any).total_conversations || 0;
-        totalCost += parseFloat((snapshot as any).total_cost || '0');
-        totalDuration += parseInt((snapshot as any).total_duration || '0');
-        totalLlmPrice += parseFloat((snapshot as any).llm_price || '0');
-        totalLlmCharge += parseFloat(snapshot.llm_charge || '0');
-        totalCallCharge += parseFloat(snapshot.call_charge || '0');
-        totalFreeMinutesConsumed += parseFloat(snapshot.free_minutes_consumed || '0');
-        totalFreeLlmDollarsConsumed += parseFloat(snapshot.free_llm_dollars_consumed || '0');
-        totalDevDiscount += parseFloat(snapshot.dev_discount || '0');
+        const s = snapshot as any;
+        totalConversations += s.total_conversations || 0;
+        totalCost += parseFloat(s.total_cost || '0');
+        totalDuration += parseInt(s.total_duration || '0');
+        totalLlmPrice += parseFloat(s.llm_price || '0');
+        totalLlmCharge += parseFloat(s.llm_charge || '0');
+        totalCallCharge += parseFloat(s.call_charge || '0');
+        totalFreeMinutesConsumed += parseFloat(s.free_minutes_consumed || '0');
+        totalFreeLlmDollarsConsumed += parseFloat(s.free_llm_dollars_consumed || '0');
+        totalDevDiscount += parseFloat(s.dev_discount || '0');
       }
     }
 
