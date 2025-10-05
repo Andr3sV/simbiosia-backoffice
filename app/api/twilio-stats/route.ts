@@ -39,8 +39,8 @@ export async function GET(request: NextRequest) {
     // Agrupar por workspace y tomar solo el más reciente de cada uno
     const latestByWorkspace = new Map();
     for (const snapshot of snapshots) {
-      if (!latestByWorkspace.has(snapshot.workspace_id)) {
-        latestByWorkspace.set(snapshot.workspace_id, snapshot);
+      if (!latestByWorkspace.has((snapshot as any).workspace_id)) {
+        latestByWorkspace.set((snapshot as any).workspace_id, snapshot);
       }
     }
 
