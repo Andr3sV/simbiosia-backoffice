@@ -72,7 +72,9 @@ export async function POST(request: NextRequest) {
 
       const calls = allCalls;
 
-      console.log(`  📞 Found ${calls?.length || 0} calls for workspace ${workspace.id} (expected: ${count})`);
+      console.log(
+        `  📞 Found ${calls?.length || 0} calls for workspace ${workspace.id} (expected: ${count})`
+      );
 
       if (!calls || calls.length === 0) {
         console.log(`  ⚠️  No calls found for workspace ${workspace.id}`);
