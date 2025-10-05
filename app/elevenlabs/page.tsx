@@ -68,9 +68,9 @@ export default function ElevenLabsPage() {
   const [activeFilter, setActiveFilter] = useState<string>('all');
   const [selectedWorkspace, setSelectedWorkspace] = useState<string>('all');
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
-  const [chartType, setChartType] = useState<'conversations' | 'cost' | 'call_charges' | 'llm_charges' | 'duration'>(
-    'conversations'
-  );
+  const [chartType, setChartType] = useState<
+    'conversations' | 'cost' | 'call_charges' | 'llm_charges' | 'duration'
+  >('conversations');
 
   const fetchWorkspaces = async () => {
     try {
@@ -185,7 +185,12 @@ export default function ElevenLabsPage() {
     },
     {
       title: 'Total Cost',
-      value: `${stats?.total_cost?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'} credits`,
+      value: `${
+        stats?.total_cost?.toLocaleString('en-US', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }) || '0.00'
+      } credits`,
       description: 'Total credits consumed (from snapshots)',
       icon: CreditCard,
       color: 'text-green-600',
@@ -193,7 +198,12 @@ export default function ElevenLabsPage() {
     },
     {
       title: 'Call Charges',
-      value: `${stats?.call_charges?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'} credits`,
+      value: `${
+        stats?.call_charges?.toLocaleString('en-US', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }) || '0.00'
+      } credits`,
       description: 'Credits for call processing',
       icon: Phone,
       color: 'text-purple-600',
@@ -201,7 +211,12 @@ export default function ElevenLabsPage() {
     },
     {
       title: 'LLM Charges',
-      value: `${stats?.llm_charges?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'} credits`,
+      value: `${
+        stats?.llm_charges?.toLocaleString('en-US', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }) || '0.00'
+      } credits`,
       description: 'Credits for LLM processing',
       icon: Brain,
       color: 'text-orange-600',
@@ -209,7 +224,12 @@ export default function ElevenLabsPage() {
     },
     {
       title: 'Cost Approx.',
-      value: `$${stats?.cost_approx?.toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }) || '0.000000'}`,
+      value: `$${
+        stats?.cost_approx?.toLocaleString('en-US', {
+          minimumFractionDigits: 6,
+          maximumFractionDigits: 6,
+        }) || '0.000000'
+      }`,
       description: 'Approximate USD cost',
       icon: DollarSign,
       color: 'text-cyan-600',
@@ -228,12 +248,6 @@ export default function ElevenLabsPage() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#171717' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white">ElevenLabs Analytics</h1>
-          <p className="mt-2 text-gray-400">Monitor your ElevenLabs conversations and costs</p>
-        </div>
-
         {/* Date Filter */}
         <Card className="mb-8 border border-transparent" style={{ backgroundColor: '#282929' }}>
           <CardContent>
@@ -470,8 +484,15 @@ export default function ElevenLabsPage() {
                       stroke="#9CA3AF"
                       fontSize={12}
                       tickFormatter={(value) => {
-                        if (chartType === 'cost' || chartType === 'call_charges' || chartType === 'llm_charges') {
-                          return value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                        if (
+                          chartType === 'cost' ||
+                          chartType === 'call_charges' ||
+                          chartType === 'llm_charges'
+                        ) {
+                          return value.toLocaleString('en-US', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          });
                         }
                         if (chartType === 'duration') return `${Math.round(value / 60)}m`;
                         return value.toLocaleString('en-US');
@@ -486,9 +507,30 @@ export default function ElevenLabsPage() {
                       }}
                       labelFormatter={(value) => new Date(value).toLocaleDateString()}
                       formatter={(value: any, name: string) => {
-                        if (chartType === 'cost') return [`${value.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 })} credits`, 'Cost'];
-                        if (chartType === 'call_charges') return [`${value.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 })} credits`, 'Call Charges'];
-                        if (chartType === 'llm_charges') return [`${value.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 })} credits`, 'LLM Charges'];
+                        if (chartType === 'cost')
+                          return [
+                            `${value.toLocaleString('en-US', {
+                              minimumFractionDigits: 4,
+                              maximumFractionDigits: 4,
+                            })} credits`,
+                            'Cost',
+                          ];
+                        if (chartType === 'call_charges')
+                          return [
+                            `${value.toLocaleString('en-US', {
+                              minimumFractionDigits: 4,
+                              maximumFractionDigits: 4,
+                            })} credits`,
+                            'Call Charges',
+                          ];
+                        if (chartType === 'llm_charges')
+                          return [
+                            `${value.toLocaleString('en-US', {
+                              minimumFractionDigits: 4,
+                              maximumFractionDigits: 4,
+                            })} credits`,
+                            'LLM Charges',
+                          ];
                         if (chartType === 'duration')
                           return [`${Math.round(value / 60)}m ${value % 60}s`, 'Duration'];
                         return [value.toLocaleString('en-US'), 'Conversations'];
