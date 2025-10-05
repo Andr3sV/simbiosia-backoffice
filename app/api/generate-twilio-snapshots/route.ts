@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
       snapshot.total_calls++;
       snapshot.total_cost += call.cost || 0;
       snapshot.total_duration += call.duration || 0;
-      
+
       // Calcular minutos reales (redondear hacia arriba)
       // Si una llamada dura 1-60 seg = 1 minuto, 61-120 seg = 2 minutos, etc.
       const duration = call.duration || 0;
