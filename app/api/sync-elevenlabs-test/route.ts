@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
         // Insertar o actualizar la conversación
         const { error: convError } = await supabase
           .from('elevenlabs_conversations')
-          .upsert(conversationData, { onConflict: 'conversation_id' });
+          .upsert(conversationData as any, { onConflict: 'conversation_id' });
 
         if (convError) {
           console.error(`  ❌ Error saving conversation:`, convError);
