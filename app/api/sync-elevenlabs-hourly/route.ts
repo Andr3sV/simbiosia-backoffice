@@ -197,7 +197,7 @@ export async function POST(request: NextRequest) {
           free_minutes_consumed: parseFloat(stats.freeMinutesConsumed.toFixed(4)),
           free_llm_dollars_consumed: parseFloat(stats.freeLlmDollarsConsumed.toFixed(4)),
           dev_discount: parseFloat(stats.devDiscount.toFixed(4)),
-        },
+        } as any,
         { onConflict: 'workspace_id,snapshot_date' }
       );
 
