@@ -43,10 +43,10 @@ export async function GET() {
             .maybeSingle();
 
           // Combinar datos
-          const twilioTotalCalls = twilioSnapshot?.total_calls || 0;
-          const twilioTotalCost = parseFloat(twilioSnapshot?.total_cost || '0');
-          const elevenlabsTotalCalls = elevenlabsSnapshot?.total_conversations || 0;
-          const elevenlabsTotalCost = parseFloat(elevenlabsSnapshot?.total_cost || '0');
+          const twilioTotalCalls = (twilioSnapshot as any)?.total_calls || 0;
+          const twilioTotalCost = parseFloat((twilioSnapshot as any)?.total_cost || '0');
+          const elevenlabsTotalCalls = (elevenlabsSnapshot as any)?.total_conversations || 0;
+          const elevenlabsTotalCost = parseFloat((elevenlabsSnapshot as any)?.total_cost || '0');
 
           return {
             ...workspace,
