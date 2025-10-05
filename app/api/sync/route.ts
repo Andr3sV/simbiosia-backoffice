@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
             workspace_id: workspace.id,
             phone_number: workspaceNumber,
             is_primary: true,
-          });
+          } as any);
         }
 
         // Obtener datos de Twilio para este workspace
