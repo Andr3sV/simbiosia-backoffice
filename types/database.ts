@@ -26,6 +26,29 @@ export interface Database {
           updated_at?: string;
         };
       };
+      workspace_phones: {
+        Row: {
+          id: number;
+          workspace_id: number;
+          phone_number: string;
+          is_primary: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: number;
+          workspace_id: number;
+          phone_number: string;
+          is_primary?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: number;
+          workspace_id?: number;
+          phone_number?: string;
+          is_primary?: boolean;
+          created_at?: string;
+        };
+      };
       call_snapshots: {
         Row: {
           id: number;
