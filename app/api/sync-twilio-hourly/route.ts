@@ -282,6 +282,7 @@ export async function POST(request: NextRequest) {
         total_calls: number;
         total_cost: number;
         total_duration: number;
+        real_minutes: number;
       }
     >();
 
@@ -301,6 +302,7 @@ export async function POST(request: NextRequest) {
           total_calls: 0,
           total_cost: 0,
           total_duration: 0,
+          real_minutes: 0,
         });
       }
 
@@ -308,6 +310,13 @@ export async function POST(request: NextRequest) {
       snapshot.total_calls++;
       snapshot.total_cost += call.cost || 0;
       snapshot.total_duration += call.duration || 0;
+      
+      // Calcular minutos reales (redondear hacia arriba)
+      // Si una llamada dura 1-60 seg = 1 minuto, 61-120 seg = 2 minutos, etc.
+      const duration = call.duration || 0;
+      if (duration > 0) {
+        snapshot.real_minutes += Math.ceil(duration / 60);
+      }
     }
 
     // Convertir Map a array
@@ -317,6 +326,7 @@ export async function POST(request: NextRequest) {
       total_calls: snapshot.total_calls,
       total_cost: parseFloat(snapshot.total_cost.toFixed(4)),
       total_duration: snapshot.total_duration,
+      real_minutes: snapshot.real_minutes,
     }));
 
     let snapshotsCreated = 0;
