@@ -60,7 +60,7 @@ export async function GET() {
                     combined_total_calls: twilioTotalCalls + elevenlabsTotalCalls,
                     combined_total_cost: twilioTotalCost + elevenlabsTotalCost,
                     snapshot_date:
-                      twilioSnapshot?.snapshot_date || elevenlabsSnapshot?.snapshot_date,
+                      (twilioSnapshot as any)?.snapshot_date || (elevenlabsSnapshot as any)?.snapshot_date,
                   }
                 : null,
           };
