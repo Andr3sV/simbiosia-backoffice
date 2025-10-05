@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
       let totalCalls = 0;
       let totalCost = 0;
       let totalDuration = 0;
-      const callsToInsert = [];
+      const callsToInsert: any[] = [];
 
       // Agregar datos de todos los números del workspace
       for (const phone of phones) {
