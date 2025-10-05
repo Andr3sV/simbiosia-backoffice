@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
     let totalCost = 0;
     let totalDuration = 0;
 
-    for (const snapshot of latestByWorkspace.values()) {
+    for (const snapshot of Array.from(latestByWorkspace.values())) {
       console.log(
         `  ✅ Workspace ${snapshot.workspace_id}: ${snapshot.total_calls} calls, $${snapshot.total_cost}`
       );
