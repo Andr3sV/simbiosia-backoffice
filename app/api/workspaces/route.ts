@@ -65,7 +65,7 @@ export async function GET() {
                 : null,
           };
         } catch (err) {
-          console.error(`Exception fetching snapshots for workspace ${workspace.id}:`, err);
+          console.error(`Exception fetching snapshots for workspace ${(workspace as any).id}:`, err);
           return {
             ...(workspace as any),
             latest_snapshot: null,
