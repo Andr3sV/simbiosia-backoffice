@@ -173,7 +173,7 @@ export async function POST(request: NextRequest) {
           conversation_date: conv.metadata?.start_time_unix_secs
             ? new Date(conv.metadata.start_time_unix_secs * 1000).toISOString()
             : new Date().toISOString(),
-        },
+        } as any,
         { onConflict: 'conversation_id' }
       );
     }
