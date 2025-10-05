@@ -49,7 +49,7 @@ export async function GET() {
           const elevenlabsTotalCost = parseFloat((elevenlabsSnapshot as any)?.total_cost || '0');
 
           return {
-            ...workspace,
+            ...(workspace as any),
             latest_snapshot:
               twilioSnapshot || elevenlabsSnapshot
                 ? {
@@ -67,7 +67,7 @@ export async function GET() {
         } catch (err) {
           console.error(`Exception fetching snapshots for workspace ${workspace.id}:`, err);
           return {
-            ...workspace,
+            ...(workspace as any),
             latest_snapshot: null,
           };
         }
