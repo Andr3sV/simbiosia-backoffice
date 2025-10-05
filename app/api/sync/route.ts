@@ -203,7 +203,7 @@ export async function POST(request: NextRequest) {
           elevenlabs_cost: elevenlabsCost,
           total_calls: combinedTotalCalls,
           total_cost: combinedTotalCost,
-          snapshot_id: snapshot.id,
+          snapshot_id: (snapshot as any).id,
         });
 
         console.log(`  ✅ Synced workspace ${workspace.id} successfully`);
