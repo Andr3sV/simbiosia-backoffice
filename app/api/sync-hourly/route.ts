@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
 
         // Guardar llamadas individuales (upsert por ID para evitar duplicados)
         if (callsToInsert.length > 0) {
-          await supabase.from('calls').upsert(callsToInsert, { onConflict: 'id' });
+          await supabase.from('calls').upsert(callsToInsert as any, { onConflict: 'id' });
         }
 
         twilioSaved += totalCalls;
